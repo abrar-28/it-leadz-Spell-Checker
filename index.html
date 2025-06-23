@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Modern Spell Checker</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+</head>
+<body>
+  <header>
+    <h1> IT Leadz Spell Checker</h1>
+    <p>Advanced browser-based spelling correction with intelligent suggestions using API</p>
+  </header>
+
+  <div class="content">
+    <div class="input-section">
+      <div class="section-title">
+        <i class="fas fa-edit"></i>
+        <h2>Enter Your Text</h2>
+      </div>
+
+      <textarea id="text-input" placeholder="Type or paste your text here...">The quick brown foxx jumps over the lazi dog. This is a testt of the spell checker. I hope it works corectly.</textarea>
+
+      <div class="controls">
+        <button class="check-btn" id="check-btn">
+          <i class="fas fa-search"></i> Check Spelling
+        </button>
+        <button class="clear-btn" id="clear-btn">
+          <i class="fas fa-eraser"></i> Clear Text
+        </button>
+      </div>
+
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-value" id="word-count">0</div>
+          <div class="stat-label">Words</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="error-count">0</div>
+          <div class="stat-label">Errors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="char-count">0</div>
+          <div class="stat-label">Characters</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-section">
+      <div class="section-title">
+        <i class="fas fa-clipboard-list"></i>
+        <h2>Spelling Results</h2>
+      </div>
+      <div class="results-container" id="results-container">
+        <div class="no-errors">
+          <i class="fas fa-check-circle"></i>
+          <h3>No spelling errors detected!</h3>
+          <p>Your text appears to be error-free.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Modern Spell Checker &copy; 2025 | Powered by LanguageTool API</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
