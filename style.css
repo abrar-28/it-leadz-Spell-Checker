@@ -1,4 +1,3 @@
-/* Base styles */
 body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   margin: 0;
@@ -36,17 +35,17 @@ header p {
   gap: 10px;
   color: #3f51b5;
   margin-bottom: 15px;
-  flex-wrap: wrap;
 }
 
-textarea {
-  width: 100%;
-  height: 150px;
+.editable {
+  min-height: 150px;
   padding: 15px;
   font-size: 1rem;
   border: 1px solid #ccc;
   border-radius: 6px;
-  resize: vertical;
+  background-color: white;
+  white-space: pre-wrap;
+  outline: none;
 }
 
 .controls {
@@ -64,7 +63,6 @@ button {
   color: white;
   cursor: pointer;
   font-size: 0.95rem;
-  flex-shrink: 0;
 }
 
 button.clear-btn {
@@ -93,64 +91,6 @@ button.clear-btn {
   color: #3f51b5;
 }
 
-.results-section {
-  margin-top: 40px;
-}
-
-.result-item {
-  background: #fff3f3;
-  border: 1px solid #f44336;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 6px;
-}
-
-.word {
-  font-weight: bold;
-  color: #d32f2f;
-  margin-bottom: 5px;
-}
-
-.context {
-  font-style: italic;
-  margin: 5px 0;
-}
-
-.highlight {
-  background-color: #ffcccc;
-  padding: 2px 5px;
-  border-radius: 4px;
-}
-
-.suggestions-title {
-  font-weight: bold;
-  margin-top: 10px;
-}
-
-.suggestion-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 5px;
-}
-
-.suggestion {
-  padding: 5px 10px;
-  background-color: #e3f2fd;
-  border: 1px solid #2196f3;
-  border-radius: 4px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.no-errors {
-  text-align: center;
-  background: #e8f5e9;
-  border: 1px solid #4caf50;
-  padding: 20px;
-  border-radius: 6px;
-}
-
 footer {
   text-align: center;
   padding: 20px;
@@ -159,9 +99,42 @@ footer {
   margin-top: 40px;
 }
 
+.highlight {
+  background-color: #ffcccc;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  position: relative;
+}
+
+.suggestion-popup {
+  position: absolute;
+  background: white;
+  border: 1px solid #ccc;
+  z-index: 999;
+  top: 100%;
+  left: 0;
+  margin-top: 5px;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+
+.suggestion-popup div {
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.suggestion-popup div:hover {
+  background-color: #eee;
+}
+
+/* Loader */
 .loading {
   text-align: center;
   padding: 20px;
+  font-size: 1rem;
+  color: #555;
 }
 
 .spinner {
@@ -179,58 +152,6 @@ footer {
   100% { transform: rotate(360deg); }
 }
 
-/* ---------- Responsive Styles ---------- */
-@media (max-width: 768px) {
-  header h1 {
-    font-size: 1.5rem;
-  }
-
-  header p {
-    font-size: 0.95rem;
-  }
-
-  .section-title h2 {
-    font-size: 1.2rem;
-  }
-
-  .stat-value {
-    font-size: 1.25rem;
-  }
-
-  .controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  button {
-    width: 100%;
-  }
-
-  .suggestion-list {
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .content {
-    padding: 0 10px;
-  }
-
-  textarea {
-    height: 120px;
-    font-size: 0.95rem;
-  }
-
-  .stat-card {
-    flex: 1 1 100%;
-  }
-
-  .result-item {
-    font-size: 0.95rem;
-  }
-
-  .suggestion {
-    font-size: 0.9rem;
-    padding: 4px 8px;
-  }
+.hidden {
+  display: none;
 }

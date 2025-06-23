@@ -1,131 +1,115 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const textInput = document.getElementById('text-input');
-    const checkBtn = document.getElementById('check-btn');
-    const clearBtn = document.getElementById('clear-btn');
-    const resultsContainer = document.getElementById('results-container');
-    const wordCount = document.getElementById('word-count');
-    const charCount = document.getElementById('char-count');
-    const errorCount = document.getElementById('error-count');
+  const textInput = document.getElementById('text-input');
+  const checkBtn = document.getElementById('check-btn');
+  const clearBtn = document.getElementById('clear-btn');
+  const wordCount = document.getElementById('word-count');
+  const charCount = document.getElementById('char-count');
+  const errorCount = document.getElementById('error-count');
+  const analyzing = document.getElementById('analyzing');
 
+  const MAX_LENGTH = 20000;
+
+  updateStats();
+
+  textInput.addEventListener('input', updateStats);
+
+  clearBtn.addEventListener('click', () => {
+    textInput.innerHTML = '';
     updateStats();
+  });
 
-    textInput.addEventListener('input', updateStats);
+  checkBtn.addEventListener('click', async () => {
+    let text = textInput.innerText.trim();
+    if (!text) return;
 
-    checkBtn.addEventListener('click', () => {
-        const text = textInput.value.trim();
-        if (!text) {
-            showNoErrors();
-            return;
-        }
-        showLoading();
-        checkSpelling(text);
-    });
-
-    clearBtn.addEventListener('click', () => {
-        textInput.value = '';
-        updateStats();
-        showNoErrors();
-    });
-
-    function updateStats() {
-        const text = textInput.value;
-        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-        const chars = text.length;
-
-        wordCount.textContent = words;
-        charCount.textContent = chars;
+    if (text.length > MAX_LENGTH) {
+      alert(`Only the first ${MAX_LENGTH} characters will be checked due to API limitations.`);
+      text = text.slice(0, MAX_LENGTH);
     }
 
-    function showNoErrors() {
-        resultsContainer.innerHTML = `
-            <div class="no-errors">
-                <i class="fas fa-check-circle"></i>
-                <h3>No spelling errors detected!</h3>
-                <p>Your text appears to be error-free.</p>
-            </div>
-        `;
+    analyzing.classList.remove('hidden');
+
+    try {
+      const response = await fetch("https://api.languagetool.org/v2/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          text: text,
+          language: "en-US"
+        })
+      });
+
+      const data = await response.json();
+      analyzing.classList.add('hidden');
+
+      if (!data || !data.matches || data.matches.length === 0) {
         errorCount.textContent = '0';
+        return;
+      }
+
+      highlightErrors(data.matches, text);
+    } catch (err) {
+      analyzing.classList.add('hidden');
+      alert("Error checking spelling: " + err.message);
     }
+  });
 
-    function showLoading() {
-        resultsContainer.innerHTML = `
-            <div class="loading">
-                <div class="spinner"></div>
-                <div class="loading-text">Analyzing your text...</div>
-            </div>
-        `;
-    }
+  function updateStats() {
+    const text = textInput.innerText;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    const chars = text.length;
+    wordCount.textContent = words;
+    charCount.textContent = chars;
+  }
 
-    async function checkSpelling(text) {
-        try {
-            const response = await fetch("https://api.languagetoolplus.com/v2/check", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: new URLSearchParams({
-                    text: text,
-                    language: "en-US"
-                })
-            });
+  function highlightErrors(matches, originalText) {
+    errorCount.textContent = matches.length;
 
-            const data = await response.json();
+    let modifiedText = originalText;
 
-            if (data.matches.length === 0) {
-                showNoErrors();
-                return;
-            }
+    matches.sort((a, b) => b.offset - a.offset); // process in reverse to preserve offsets
 
-            displayResults(data.matches, text);
-        } catch (error) {
-            resultsContainer.innerHTML = `<p style="color:red">Error checking spelling: ${error.message}</p>`;
-            errorCount.textContent = '0';
-        }
-    }
+    matches.forEach(match => {
+      const word = originalText.substring(match.offset, match.offset + match.length);
+      const suggestions = match.replacements.map(r => r.value).slice(0, 5);
+      const span = `<span class="highlight" data-suggestions='${JSON.stringify(suggestions)}'>${word}</span>`;
 
-    function displayResults(matches, originalText) {
-        errorCount.textContent = matches.length;
-        let resultHTML = '';
+      modifiedText =
+        modifiedText.slice(0, match.offset) +
+        span +
+        modifiedText.slice(match.offset + match.length);
+    });
 
-        matches.forEach(match => {
-            const errorText = originalText.substring(match.offset, match.offset + match.length);
-            const context = originalText.substring(
-                Math.max(0, match.offset - 30),
-                Math.min(originalText.length, match.offset + match.length + 30)
-            ).replace(errorText, `<span class="highlight">${errorText}</span>`);
+    textInput.innerHTML = modifiedText;
 
-            const suggestions = match.replacements.map(rep => rep.value).slice(0, 5);
+    document.querySelectorAll('.highlight').forEach(span => {
+      span.addEventListener('click', function (e) {
+        e.stopPropagation();
+        removePopups();
 
-            resultHTML += `
-                <div class="result-item">
-                    <div class="word"><i class="fas fa-exclamation-circle"></i> ${errorText}</div>
-                    <div class="context">${context}</div>
-                    <div class="suggestions-title"><i class="fas fa-lightbulb"></i> SUGGESTIONS:</div>
-                    <div class="suggestion-list">
-                        ${suggestions.map(s => `
-                            <div class="suggestion" data-correction="${s}">
-                                ${s}
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>
-            `;
+        const suggestions = JSON.parse(this.dataset.suggestions);
+        const popup = document.createElement('div');
+        popup.classList.add('suggestion-popup');
+
+        suggestions.forEach(s => {
+          const option = document.createElement('div');
+          option.textContent = s;
+          option.addEventListener('click', () => {
+            this.outerHTML = s;
+            updateStats();
+            removePopups();
+          });
+          popup.appendChild(option);
         });
 
-        resultsContainer.innerHTML = resultHTML;
+        this.appendChild(popup);
+      });
+    });
 
-        document.querySelectorAll('.suggestion').forEach(suggestion => {
-            suggestion.addEventListener('click', function () {
-                const replacement = this.getAttribute('data-correction');
-                const errorItem = this.closest('.result-item');
-                const errorWord = errorItem.querySelector('.word').textContent.replace(/^\W+/, '').trim();
+    document.body.addEventListener('click', removePopups);
+  }
 
-                textInput.value = textInput.value.replace(
-                    new RegExp(`\\b${errorWord}\\b`, 'g'),
-                    replacement
-                );
-
-                updateStats();
-                checkBtn.click();
-            });
-        });
-    }
+  function removePopups() {
+    document.querySelectorAll('.suggestion-popup').forEach(p => p.remove());
+  }
 });
